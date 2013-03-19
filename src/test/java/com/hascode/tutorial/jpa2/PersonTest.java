@@ -23,9 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class PersonTest {
-	private static EntityManagerFactory	emf;
-	private static EntityManager		em;
-	private static EntityTransaction	tx;
+	private static EntityManagerFactory emf;
+	private static EntityManager em;
+	private static EntityTransaction tx;
 
 	@Before
 	public void initEntityManager() throws Exception {
@@ -217,24 +217,26 @@ public class PersonTest {
 		tx.commit();
 
 		// query with named parameters (i prefer this one)
-		Query query = em
-				.createQuery("SELECT p FROM Person p WHERE p.nickname=:name");
+		TypedQuery<Person> query = em.createQuery(
+				"SELECT p FROM Person p WHERE p.nickname=:name", Person.class);
 		query.setParameter("name", "HAL9000");
-		Person p1 = (Person) query.getResultList().get(0);
+		Person p1 = query.getResultList().get(0);
 		assertEquals(hal.getId(), p1.getId());
 
 		// same with positional parameters
-		Query query2 = em
-				.createQuery("SELECT p FROM Person p WHERE p.nickname=?1");
+		TypedQuery<Person> query2 = em.createQuery(
+				"SELECT p FROM Person p WHERE p.nickname=?1", Person.class);
 		query2.setParameter(1, "HAL9000");
-		Person p2 = (Person) query2.getResultList().get(0);
+		Person p2 = query2.getResultList().get(0);
 		assertEquals(hal.getId(), p2.getId());
 
 		// an example using joins
-		Query query3 = em
-				.createQuery("SELECT p FROM Person p LEFT JOIN FETCH p.bookmarks b WHERE b.title=:title");
+		TypedQuery<Person> query3 = em
+				.createQuery(
+						"SELECT p FROM Person p LEFT JOIN FETCH p.bookmarks b WHERE b.title=:title",
+						Person.class);
 		query3.setParameter("title", "Snoring for experts");
-		Person p3 = (Person) query3.getResultList().get(0);
+		Person p3 = query3.getResultList().get(0);
 		assertEquals(hal.getId(), p3.getId());
 	}
 
@@ -251,7 +253,8 @@ public class PersonTest {
 		em.persist(ronald);
 		tx.commit();
 
-		List<Person> persons = em.createNamedQuery("findAll").getResultList();
+		List<Person> persons = em.createNamedQuery("findAll", Person.class)
+				.getResultList();
 		assertEquals(2, persons.size());
 
 		Query q = em.createNamedQuery("findByNickname");
